@@ -61,3 +61,23 @@ function togglePassword() {
     const input = document.getElementById('password');
     input.type = input.type === 'password' ? 'text' : 'password';
 }
+
+const swiper = new Swiper(".mySwiper", {
+    loop: false,
+    pagination: {
+        el: ".swiper-pagination",
+        clickable: true,
+    },
+    navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev",
+    },
+});
+
+// Miniaturas controlan el carrusel
+document.querySelectorAll('.miniatura').forEach(mini => {
+    mini.addEventListener('click', () => {
+        const index = parseInt(mini.getAttribute('data-index'));
+        swiper.slideTo(index);
+    });
+});

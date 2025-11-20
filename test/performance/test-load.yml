@@ -1,0 +1,12 @@
+# tests/performance/test-load.yml
+config:
+  target: 'https://localhost:3001'
+  tls:
+    rejectUnauthorized: false
+  phases:
+    - duration: 60
+      arrivalRate: 10
+scenarios:
+  - flow:
+      - get:
+          url: "/usuarios"

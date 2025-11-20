@@ -16,7 +16,7 @@ const ejs = require('ejs');
 const storage = multer.diskStorage({
     destination: './public/uploads/',
     filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);
+        cb(null, file.originalname);
     }
 });
 const upload = multer({ storage });
@@ -269,9 +269,40 @@ const UserController = {
     async agregarProducto(req, res) {
         try {
             const { nombre_producto, descripcion, precio, cantidad, id_categoria, vendedor } = req.body;
-            const imagen_url = req.file ? `/uploads/${req.file.filename}` : null; // Si no hay imagen, se deja como `null`
+            // const imagen_url = req.file ? `/uploads/${req.file.originalname}` : null;
 
-            await UserModel.agregarProducto({ nombre_producto, descripcion, precio, cantidad, imagen_url, id_categoria, vendedor });
+            // Obtener la primera imagen si existe
+            const primeraImagen = req.files?.[0]?.originalname;
+            const imagen_url = primeraImagen ? `/uploads/${primeraImagen}` : null;
+
+            // Insertar producto principal
+            const result = await UserModel.agregarProducto({
+                nombre_producto,
+                descripcion,
+                precio,
+                cantidad,
+                imagen_url,
+                id_categoria,
+                vendedor
+            });
+
+
+            const id_producto = result.insertId;
+
+            // Insertar imagen en tabla imagenes_producto
+            if (req.files && req.files.length > 0) {
+                let orden = 1;
+                for (const file of req.files) {
+                    const url_imagen = `/uploads/${file.originalname}`;
+                    await UserModel.agregarImagenProducto({
+                        id_producto,
+                        url_imagen,
+                        orden
+                    });
+                    orden++;
+                }
+            }
+
             res.redirect('/usuarios/admin/categorias/accesorios');
         } catch (error) {
             console.error('Error al agregar el producto', error);
@@ -297,7 +328,8 @@ const UserController = {
             const { id_producto } = req.params;
             const producto = await UserModel.obtenerProductosPorId(id_producto);
             const categorias = await UserModel.obtenerCategorias();
-            res.render('admin/editar-producto', { producto, categorias });
+            const imagenes = await UserModel.obtenerImagenesPorProducto(id_producto);
+            res.render('admin/editar-producto', { producto, categorias, imagenes });
         } catch (error) {
             console.error('Error al obtener el producto:', error);
             res.status(500).send('Error al obtener el producto');
@@ -309,9 +341,33 @@ const UserController = {
         try {
             const { id_producto } = req.params;
             const { nombre_producto, descripcion, precio, cantidad, id_categoria, vendedor } = req.body;
-            const imagen_url = req.file ? `/uploads/${req.file.filename}` : null; // Si no hay imagen, no se modifica
 
-            await UserModel.actualizarProducto(id_producto, { nombre_producto, descripcion, precio, cantidad, imagen_url, id_categoria, vendedor });
+
+            await UserModel.actualizarProducto(id_producto, {
+                nombre_producto,
+                descripcion,
+                precio,
+                cantidad,
+                id_categoria,
+                vendedor
+            });
+            // Si hay nueva imagen, actualizamos tabla imagenes_producto
+            if (req.files && req.files.length > 0) {
+                // Primero borramos las imagenes anteriores
+                await UserModel.eliminarImagenesProducto(id_producto);
+                //insertamos las nuevas imagenes
+                let orden = 1;
+                for (const file of req.files) {
+                    const url_imagen = `/uploads/${file.originalname}`;
+                    await UserModel.agregarImagenProducto({
+                        id_producto,
+                        url_imagen,
+                        orden
+                    });
+                    orden++;
+                }
+                await UserModel.actualizarImagenPrincipalProducto(id_producto, `/uploads/${req.files[0].originalname}`);
+            }
             res.redirect('/usuarios/admin/categorias/accesorios');
         } catch (error) {
             console.error('Error al actualizar el producto', error);
@@ -323,7 +379,10 @@ const UserController = {
     async eliminarProducto(req, res) {
         try {
             const { id_producto } = req.params;
+            await UserModel.eliminarImagenesProducto(id_producto);
+
             await UserModel.eliminarProducto(id_producto);
+            
             res.redirect('/usuarios/admin/categorias/accesorios');
         } catch (error) {
             console.error('Error al eliminar el producto', error);
@@ -559,6 +618,7 @@ const UserController = {
     },
 
     // Mostrar detalles del producto al dar clic
+    // Controlador
     async verDetalleProducto(req, res) {
         const id_producto = req.params.id_producto;
 
@@ -567,9 +627,12 @@ const UserController = {
             if (!producto) {
                 return res.status(404).send('Producto no encontrado');
             }
+
+            const imagenes = await UserModel.obtenerImagenesPorProducto(id_producto);
             const destacados = await UserModel.obtenerProductosDestacados();
             const relacionados = await UserModel.obtenerProductosRelacionados(producto.id_categoria, id_producto);
-            res.render('usuarios/detalleProducto', { producto, destacados, relacionados });
+
+            res.render('usuarios/detalleProducto', { producto, imagenes, destacados, relacionados });
         } catch (error) {
             console.error('Error al cargar detalle del producto:', error);
             res.status(500).send('Error interno');
@@ -836,8 +899,18 @@ const UserController = {
             console.error('Error al cargar reembolso:', error);
             res.status(500).send('Error interno del servidor.');
         }
-    }
+    },
 
+    //Testing 
+    async listarUsuariosTesteo(req, res) {
+        try {
+            const [usuarios] = await pool.query('SELECT * FROM usuarios');
+            res.json(usuarios); // 🔥 Devuelve array JSON
+        } catch (error) {
+            console.error('Error al listar usuarios:', error);
+            res.status(500).json({ error: 'Error interno del servidor' });
+        }
+    },
 
 
 };

@@ -414,3 +414,30 @@ footer p {
     transition: transform 0.2s ease-in-out;
 }
 
+/* detalle del producto */
+/* Estilo personalizado para flechas Swiper */
+.swiper-button-next,
+.swiper-button-prev {
+    color: #333;
+    /* Cambia el color si quieres */
+    font-size: 20px;
+    /* Reduce el tamaño del ícono */
+    width: 30px;
+    height: 30px;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Opcional: ocultar en pantallas pequeñas */
+@media (max-width: 576px) {
+
+    .swiper-button-next,
+    .swiper-button-prev {
+        display: none;
+    }
+}
+
+.object-fit-cover {
+    object-fit: cover;
+}

@@ -3,9 +3,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const path = require('path');
-const fs = require('fs');
-const http = require('http');
-const https = require('https');
 const engine = require('ejs-locals');
 const methodOverride = require('method-override');
 const cors = require('cors');
@@ -15,16 +12,8 @@ const userRoutes = require('./routes/routes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const rutasApis = require('./routes/api');
 const UserController = require('./controllers/controllerUser');
-const pool = require('./database/db');
 
 const app = express();
-const HTTPS_PORT = 3001;
-const HTTP_PORT = 3002;
-
-// 🔐 Cargar certificados SSL
-const privateKey = fs.readFileSync(path.join(__dirname, 'cert', 'key.pem'), 'utf8');
-const certificate = fs.readFileSync(path.join(__dirname, 'cert', 'cert.pem'), 'utf8');
-const credentials = { key: privateKey, cert: certificate };
 
 // 🛡️ CORS para permitir peticiones externas (como desde tu app móvil)
 app.use(cors());
@@ -35,10 +24,6 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
 }));
-
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/img', express.static(path.join(__dirname, 'img')));
-
 
 // 📦 Lectura de formularios y JSON
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -56,6 +41,8 @@ app.use((req, res, next) => {
 });
 
 // 🖼️ Archivos estáticos
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/img', express.static(path.join(__dirname, 'img')));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 🎨 Motor de vistas
@@ -80,12 +67,4 @@ app.use('/usuarios', userRoutes);
 // 📱 Rutas API para móvil
 app.use('/api', rutasApis);
 
-// 🚀 Servidor HTTPS (para tu web)
-https.createServer(credentials, app).listen(HTTPS_PORT, () => {
-    console.log(`✅ Servidor HTTPS iniciado en https://localhost:${HTTPS_PORT}`);
-});
-
-// 🚀 Servidor HTTP (para tu app móvil en desarrollo)
-http.createServer(app).listen(HTTP_PORT, '0.0.0.0', () => {
-    console.log(`✅ Servidor HTTP para móvil iniciado en http://0.0.0.0:${HTTP_PORT}`);
-});
+module.exports = app; // ✅ solo exporta la app

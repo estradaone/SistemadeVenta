@@ -21,7 +21,7 @@
                             <h3 class="text-center text-primary mb-4">🛠️ Editar Producto</h3>
 
                             <form action="/usuarios/admin/productos/editar/<%= producto.id_producto %>" method="POST"
-                                enctype="multipart/form-data">
+                                enctype="multipart/form-data"  >
                                 <div class="mb-3">
                                     <label for="nombre_producto" class="form-label">Nombre del Producto</label>
                                     <input type="text" id="nombre_producto" name="nombre_producto" class="form-control"
@@ -66,12 +66,16 @@
 
                                 <div class="mb-3">
                                     <label for="imagen" class="form-label">Imagen del Producto (Opcional)</label>
-                                    <input type="file" id="imagen" name="imagen" class="form-control">
-                                    <% if (producto.imagen_url) { %>
+                                    <input type="file" id="imagenes" name="imagenes" class="form-control" multiple>
+                                    <% if (imagenes && imagenes.length> 0) { %>
                                         <div class="mt-2">
-                                            <p class="mb-1">Imagen actual:</p>
-                                            <img src="<%= producto.imagen_url %>" alt="<%= producto.nombre_producto %>"
-                                                class="img-thumbnail" width="200">
+                                            <p class="mb-1">Imágenes actuales:</p>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <% imagenes.forEach(img=> { %>
+                                                    <img src="<%= img.url_imagen %>" alt="Imagen producto"
+                                                        class="img-thumbnail" width="120">
+                                                    <% }) %>
+                                            </div>
                                         </div>
                                         <% } %>
                                 </div>

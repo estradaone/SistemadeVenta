@@ -1,111 +1,124 @@
 <header id="navbarPrincipal" class="navbar navbar-expand-lg navbar-dark bg-color sticky-top shadow-sm py-2">
-    <div class="container d-flex justify-content-between align-items-center">
+    <div class="container-fluid px-3">
+        <!-- Botón hamburguesa para móviles -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContenido"
+            aria-controls="navbarContenido" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-        <!-- Lado izquierdo: búsqueda + links -->
-        <div class="d-flex align-items-center">
-            <!-- Ícono búsqueda -->
-            <button class="btn btn-link text-white me-4" data-bs-toggle="modal" data-bs-target="#searchModal">
-                <img src="/img/buscar.png" alt="Buscar" width="24" height="24">
-            </button>
-
-            <!-- Categorías e Inicio -->
-            <ul class="navbar-nav flex-row">
-                <li class="nav-item dropdown me-3" data-bs-toggle="tooltip" title="Explora por categoría">
-                    <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button"
-                        data-bs-toggle="dropdown" aria-expanded="false">Categorías</a>
-                    <ul class="dropdown-menu bg-light border-0 shadow-sm" aria-labelledby="navbarDropdown">
-                        <% const base=user && user.rol==='administrador' ? '/usuarios/admin/categorias/'
-                            : '/usuarios/usuarios/categorias/' ; %>
-                            <li><a class="dropdown-item" href="<%= base %>accesorios">🪄 Accesorios</a></li>
-                            <li><a class="dropdown-item" href="<%= base %>bolsos">👜 Bolsos</a></li>
-                            <li><a class="dropdown-item" href="<%= base %>sombreros">👒 Sombreros</a></li>
-                            <li><a class="dropdown-item" href="<%= base %>blusas">👚 Blusas</a></li>
-                            <li><a class="dropdown-item" href="<%= base %>peluches">🧸 Peluches</a></li>
-                            <li><a class="dropdown-item" href="<%= base %>llaveros">🖇️ Llaveros</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item me-3"><a class="nav-link text-white" href="/">Inicio</a></li>
-                <li class="nav-item me-3">
-                    <a class="nav-link text-white"
-                        href="<%= user && user.rol === 'administrador' ? '/usuarios/admin/tienda' : '/usuarios/tienda' %>">Tienda</a>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Logo centrado -->
-        <a class="navbar-brand mx-auto text-center" href="/">
+        <!-- Logo centrado en móviles -->
+        <a class="navbar-brand mx-auto d-lg-none" href="/">
             <img class="logo" src="/img/logoBuena.png" alt="Artesanía Local Logo">
         </a>
 
-        <!-- Lado derecho -->
-        <div class="d-flex align-items-center">
-            <!-- Menú derecho -->
-            <ul class="navbar-nav flex-row me-4">
-                <li class="nav-item me-3"><a class="nav-link text-white" href="/nosotros">Nosotros</a></li>
-                <li class="nav-item me-3"><a class="nav-link text-white" href="/ayuda">¿Te ayudamos?</a></li>
-            </ul>
+        <div class="collapse navbar-collapse" id="navbarContenido">
+            <div class="d-flex flex-column flex-lg-row justify-content-between w-100 align-items-center">
+                <!-- Lado izquierdo -->
+                <div class="d-flex flex-column flex-lg-row align-items-center mb-3 mb-lg-0">
+                    <!-- Búsqueda -->
+                    <button class="btn btn-link text-white me-lg-4 mb-2 mb-lg-0" data-bs-toggle="modal"
+                        data-bs-target="#searchModal">
+                        <img src="/img/buscar.png" alt="Buscar" width="24" height="24">
+                    </button>
 
-            <!-- Íconos de usuario -->
-            <div class="d-flex align-items-center">
-                <% if (user) { %>
-                    <% if (user.rol !=='administrador' ) { %>
-                        <!-- Carrito -->
-                        <a class="nav-link text-white me-3 position-relative" href="/usuarios/carrito"
-                            data-bs-toggle="tooltip" title="Carrito">
-                            <img src="/img/carritoCompras.png" alt="Carrito" width="25" height="25">
-                            <span id="carritoContador"
-                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                style="display: none;">0</span>
-                        </a>
+                    <!-- Categorías e Inicio -->
+                    <ul class="navbar-nav flex-lg-row">
+                        <li class="nav-item dropdown me-lg-3" data-bs-toggle="tooltip" title="Explora por categoría">
+                            <a class="nav-link dropdown-toggle text-white" href="#" id="navbarDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">Categorías</a>
+                            <ul class="dropdown-menu bg-light border-0 shadow-sm" aria-labelledby="navbarDropdown">
+                                <% const base=user && user.rol==='administrador' ? '/usuarios/admin/categorias/'
+                                    : '/usuarios/usuarios/categorias/' ; %>
+                                    <li><a class="dropdown-item" href="<%= base %>accesorios">🪄 Accesorios</a></li>
+                                    <li><a class="dropdown-item" href="<%= base %>bolsos">👜 Bolsos</a></li>
+                                    <li><a class="dropdown-item" href="<%= base %>sombreros">👒 Sombreros</a></li>
+                                    <li><a class="dropdown-item" href="<%= base %>blusas">👚 Blusas</a></li>
+                                    <li><a class="dropdown-item" href="<%= base %>peluches">🧸 Peluches</a></li>
+                                    <li><a class="dropdown-item" href="<%= base %>llaveros">🖇️ Llaveros</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item me-lg-3"><a class="nav-link text-white" href="/">Inicio</a></li>
+                        <li class="nav-item me-lg-3">
+                            <a class="nav-link text-white"
+                                href="<%= user && user.rol === 'administrador' ? '/usuarios/admin/tienda' : '/usuarios/tienda' %>">Tienda</a>
+                        </li>
+                    </ul>
+                </div>
 
-                        <!-- Pedidos -->
-                        <a class="nav-link text-white me-3" href="/usuarios/pedidos" data-bs-toggle="tooltip"
-                            title="Mis compras">
-                            <img src="/img/comprar.png" alt="Mis compras" width="25" height="25">
-                        </a>
-                        <% } %>
+                <!-- Logo centrado en escritorio -->
+                <a class="navbar-brand d-none d-lg-block mx-auto text-center" href="/">
+                    <img class="logo" src="/img/logoBuena.png" alt="Artesanía Local Logo">
+                </a>
 
-                            <!-- Perfil -->
-                            <a class="nav-link text-white me-3"
-                                href="<%= user.rol === 'administrador' ? '/usuarios/admin/perfil' : '/usuarios/perfil' %>"
-                                data-bs-toggle="tooltip" title="Mi perfil">
-                                <img src="/img/perfil.png" alt="Perfil" width="24" height="24">
-                            </a>
+                <!-- Lado derecho -->
+                <div class="d-flex flex-column flex-lg-row align-items-center">
+                    <!-- Menú derecho -->
+                    <ul class="navbar-nav flex-lg-row me-lg-4 mb-3 mb-lg-0">
+                        <li class="nav-item me-lg-3"><a class="nav-link text-white" href="/nosotros">Nosotros</a></li>
+                        <li class="nav-item me-lg-3"><a class="nav-link text-white" href="/ayuda">¿Te ayudamos?</a></li>
+                    </ul>
 
-                            <% if (user.rol==='administrador' ) { %>
-                                <div class="d-flex align-items-center admin-tools">
-                                    <!-- Usuarios -->
-                                    <a class="nav-link text-white me-3" href="/usuarios/usuariosExistentes"
-                                        data-bs-toggle="tooltip" title="Usuarios registrados">
-                                        <img src="/img/registrarse.png" alt="Usuarios" width="24" height="24">
-                                    </a>
+                    <!-- Íconos de usuario -->
+                    <div class="d-flex flex-wrap justify-content-center align-items-center gap-3">
+                        <% if (user) { %>
+                            <% if (user.rol !=='administrador' ) { %>
+                                <!-- Carrito -->
+                                <a class="nav-link text-white position-relative" href="/usuarios/carrito"
+                                    data-bs-toggle="tooltip" title="Carrito">
+                                    <img src="/img/carritoCompras.png" alt="Carrito" width="25" height="25">
+                                    <span id="carritoContador"
+                                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                        style="display: none;">0</span>
+                                </a>
 
-                                    <!-- Historial de ventas -->
-                                    <a class="nav-link text-white me-3" href="/usuarios/admin/historialVentas"
-                                        data-bs-toggle="tooltip" title="Historial de ventas">
-                                        <img src="/img/ventas.png" alt="Historial de ventas" width="24" height="24">
-                                    </a>
-                                </div>
+                                <!-- Pedidos -->
+                                <a class="nav-link text-white" href="/usuarios/pedidos" data-bs-toggle="tooltip"
+                                    title="Mis compras">
+                                    <img src="/img/comprar.png" alt="Mis compras" width="25" height="25">
+                                </a>
                                 <% } %>
 
-                                    <!-- Logout -->
-                                    <a class="nav-link text-white" href="/usuarios/logout">
-                                        <img src="/img/cerrarSesion.png" alt="Cerrar sesión" width="24" height="24"
-                                            data-bs-toggle="tooltip" title="Cerrar sesión">
+                                    <!-- Perfil -->
+                                    <a class="nav-link text-white"
+                                        href="<%= user.rol === 'administrador' ? '/usuarios/admin/perfil' : '/usuarios/perfil' %>"
+                                        data-bs-toggle="tooltip" title="Mi perfil">
+                                        <img src="/img/perfil.png" alt="Perfil" width="24" height="24">
                                     </a>
-                                    <% } else { %>
-                                        <!-- Registro -->
-                                        <a class="nav-link text-white me-3" href="/registro" data-bs-toggle="tooltip"
-                                            title="Crear cuenta">
-                                            <img src="/img/agregarUsuario.png" alt="Registro" width="24" height="24">
-                                        </a>
 
-                                        <!-- Login -->
-                                        <a class="nav-link text-white" href="/usuarios/loggin" data-bs-toggle="tooltip"
-                                            title="Iniciar sesión">
-                                            <img src="/img/iniciarSesion.png" alt="Login" width="24" height="24">
+                                    <% if (user.rol==='administrador' ) { %>
+                                        <!-- Herramientas admin -->
+                                        <a class="nav-link text-white" href="/usuarios/usuariosExistentes"
+                                            data-bs-toggle="tooltip" title="Usuarios registrados">
+                                            <img src="/img/registrarse.png" alt="Usuarios" width="24" height="24">
+                                        </a>
+                                        <a class="nav-link text-white" href="/usuarios/admin/historialVentas"
+                                            data-bs-toggle="tooltip" title="Historial de ventas">
+                                            <img src="/img/ventas.png" alt="Historial de ventas" width="24" height="24">
                                         </a>
                                         <% } %>
+
+                                            <!-- Logout -->
+                                            <a class="nav-link text-white" href="/usuarios/logout">
+                                                <img src="/img/cerrarSesion.png" alt="Cerrar sesión" width="24"
+                                                    height="24" data-bs-toggle="tooltip" title="Cerrar sesión">
+                                            </a>
+                                            <% } else { %>
+                                                <!-- Registro -->
+                                                <a class="nav-link text-white" href="/registro" data-bs-toggle="tooltip"
+                                                    title="Crear cuenta">
+                                                    <img src="/img/agregarUsuario.png" alt="Registro" width="24"
+                                                        height="24">
+                                                </a>
+
+                                                <!-- Login -->
+                                                <a class="nav-link text-white" href="/usuarios/loggin"
+                                                    data-bs-toggle="tooltip" title="Iniciar sesión">
+                                                    <img src="/img/iniciarSesion.png" alt="Login" width="24"
+                                                        height="24">
+                                                </a>
+                                                <% } %>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

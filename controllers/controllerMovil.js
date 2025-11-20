@@ -1,8 +1,9 @@
 const UserModel = require('../models/modelUser');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto')
 const nodemailer = require('nodemailer')
-const { verDetalleProducto } = require('./controllerUser');
-const pool = require('../database/db')
+const { verDetalleProducto, resetPassword } = require('./controllerUser');
+const pool = require('../database/db');
 
 const UserControllerMovil = {
     // Registro de cuenta
@@ -20,7 +21,7 @@ const UserControllerMovil = {
 
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            await UserModel.registrarUsuario({
+            const nuevoUsuario = await UserModel.registrarUsuario({
                 nombre,
                 apellidos,
                 email,
@@ -28,33 +29,60 @@ const UserControllerMovil = {
             });
 
             req.session.user = {
-                nombre,
-                apellidos,
-                email,
-                rol: 'usuario'
+                id_usuario: nuevoUsuario.id_usuario,
+                nombre: nuevoUsuario.nombre,
+                apellidos: nuevoUsuario.apellidos,
+                email: nuevoUsuario.email,
+                rol: nuevoUsuario.rol,
+                estado: nuevoUsuario.estado
             };
 
-            res.json({ mensaje: 'Usuario registrado correctamente' });
+            return res.status(200).json({
+                mensaje: 'Usuario registrado correctamente',
+                usuario: req.session.user
+            });
         } catch (error) {
             console.error('Error al registrar usuario:', error);
-            res.status(500).json({ error: 'Error interno' });
+            return res.status(500).json({ error: 'Error interno' });
         }
-    }
-    ,
+    },
     // 🔐 Login
     async login(req, res) {
         const { email, password } = req.body;
         try {
             const user = await UserModel.authenticateUser(email, password);
-            if (!user) return res.status(401).json({ error: 'Credenciales inválidas' });
-            if (user.estado === 'suspendido') return res.status(403).json({ error: 'Cuenta suspendida' });
 
-            res.json({ mensaje: 'Usuario ha iniciado sesión correctamente', usuario: user });
+            if (!user) {
+                return res.status(401).json({
+                    success: false,
+                    motivo: 'credenciales_invalidas',
+                    error: 'Credenciales inválidas'
+                });
+            }
+
+            if (user.estado === 'suspendido') {
+                return res.status(403).json({
+                    success: false,
+                    motivo: 'suspendido',
+                    error: 'Cuenta suspendida'
+                });
+            }
+
+            return res.json({
+                success: true,
+                mensaje: 'Usuario ha iniciado sesión correctamente',
+                usuario: user
+            });
         } catch (error) {
             console.error('Error en login móvil:', error);
-            res.status(500).json({ error: 'Error interno' });
+            return res.status(500).json({
+                success: false,
+                motivo: 'error_interno',
+                error: 'Error interno'
+            });
         }
     },
+
     // Obtener todos los productos
     async obtenerTodosLosProductos(req, res) {
         try {
@@ -236,11 +264,13 @@ const UserControllerMovil = {
                 return res.status(404).json({ error: 'Producto no encontrado' });
             }
 
+            const imagenes = await UserModel.obtenerImagenesPorProducto(id_producto);
             const destacados = await UserModel.obtenerProductosDestacados();
             const relacionados = await UserModel.obtenerProductosRelacionados(producto.id_categoria, id_producto);
 
             res.json({
                 producto,
+                imagenes,
                 destacados,
                 relacionados
             });
@@ -464,6 +494,100 @@ const UserControllerMovil = {
         } catch (error) {
             console.error('Error al enviar el correo:', error);
             res.status(500).json({ success: false, error: 'Error al enviar el mensaje' });
+        }
+    },
+
+    async verPerfilUsuarioMovil(req, res) {
+        const { id_usuario } = req.body;
+        try {
+            const [result] = await pool.query('SELECT * FROM usuarios WHERE id_usuario = ?', [id_usuario]);
+            const usuario = result[0];
+            res.status(200).json({ success: true, usuario });
+        } catch (error) {
+            console.error('Error al cargar el perfil del usuario:', error);
+            res.status(500).json({ error: "Error interno del sistema" });
+        }
+    },
+
+    async actualizarPerfilMovil(req, res) {
+        const { id_usuario, nombre, apellidos, email } = req.body;
+
+        try {
+            await UserModel.actualizarUsuarios(id_usuario, { nombre, apellidos, email });
+            res.status(200).json({ success: true, mensaje: 'Perfil actualizado correctamente' });
+        } catch (error) {
+            console.error('Error al actualizar perfil del usuario:', error);
+            res.status(500).json({ error: "Error interno del sistema" });
+        }
+    },
+    // Enviar token de recuperacion
+    async sendResetTokenMovil(req, res) {
+        const { email } = req.body;
+
+        try {
+            const user = await UserModel.authenticateUser(email);
+            if (!user) {
+                return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+            }
+
+            const token = crypto.randomBytes(32).toString('hex');
+            const expiration = new Date(Date.now() + 3600000); // 1 hora
+
+            await UserModel.setResetToken(email, token, expiration);
+
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.EMAIL_PASS
+                }
+            });
+
+            const resetLink = `${process.env.BASE_URL}/usuarios/reset-password/${token}`;
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: email,
+                subject: 'Restablece tu contraseña',
+                html: `<p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p><a href="${resetLink}">${resetLink}</a>`
+            };
+
+            await transporter.sendMail(mailOptions);
+            res.status(200).json({ success: true, message: 'Correo enviado con éxito' });
+        } catch (error) {
+            console.error('Error al enviar el correo:', error);
+            res.status(500).json({ success: false, message: 'Error al enviar el correo' });
+        }
+    },
+
+    async resetPasswordMovil(req, res) {
+        const { token, newPassword } = req.body;
+
+        try {
+            const user = await UserModel.verifyResetToken(token);
+            if (!user) {
+                return res.status(400).json({ success: false, message: 'Token inválido o expirado' });
+            }
+
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            await UserModel.updatePassword(user.id_usuario, hashedPassword);
+
+            res.status(200).json({ success: true, message: 'Contraseña actualizada correctamente' });
+        } catch (error) {
+            console.error('Error al actualizar la contraseña:', error);
+            res.status(500).json({ success: false, message: 'Error al actualizar la contraseña' });
+        }
+    },
+    //Buscar productos movil
+    async buscarProductosMovil(req, res) {
+        const searchTerm = req.query.search || '';
+        try {
+            const productos = await UserModel.buscarProductos(searchTerm);
+
+            // Devuelve JSON para consumo móvil
+            res.json(productos);
+        } catch (error) {
+            console.error('Error al buscar productos desde móvil:', error);
+            res.status(500).json({ productos: [], error: 'Error interno del servidor' });
         }
     }
 

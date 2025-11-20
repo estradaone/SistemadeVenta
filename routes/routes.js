@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const UserController = require('../controllers/controllerUser');
 const UserModel = require('../models/modelUser');
+const { route } = require('./api');
+const controllerUser = require('../controllers/controllerUser');
+const { upload } = require('../controllers/controllerUser');
+const controladorPaypal = require('../controllers/controladorPaypal');
 
 // Ruta para registrar un usuario
 router.post('/registrar', UserController.registrarUsuario);
@@ -69,11 +73,10 @@ router.post('/reset-password', UserController.resetPassword);
 
 // Rutas del CRUD de Productos ( SOLO ADMIN)
 router.get('/admin/productos/agregar', UserController.mostrarFormularioAgregar);
-router.post('/admin/productos/agregar', UserController.upload.single('imagen'), UserController.agregarProducto);
+router.post('/admin/productos/agregar', upload.array('imagenes', 5), UserController.agregarProducto);
 router.get('/admin/productos/editar/:id_producto', UserController.obtenerProductos);
-router.post('/admin/productos/editar/:id_producto', UserController.upload.single('imagen'), UserController.actualizarProductos);
+router.post('/admin/productos/editar/:id_producto', upload.array('imagenes', 5), UserController.actualizarProductos);
 router.get('/admin/productos/eliminar/:id_producto', UserController.eliminarProducto);
-
 // Ruta del CRUD de Usuarios (ADMIN)
 router.get('/admin/usuarios', UserController.listarUsuarios);
 router.get('/admin/usuarios/agregar', UserController.mostrarFormularioAgregarUsuario);
@@ -228,6 +231,12 @@ router.get('/rembolso/:id', UserController.verReembolso);
 
 //Ruta para generar PDF
 router.get('/admin/historialVentas/pdf', UserController.generarPDFVentas);
+
+// RUta de testing
+router.get('/', controllerUser.listarUsuariosTesteo);
+
+//PayPal
+router.post('/api/pago-tarjeta', controladorPaypal.pagoTarjeta);
 
 module.exports = router;
 // Rutas para la navegacion de categorias

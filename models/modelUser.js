@@ -84,10 +84,24 @@ const UserModel = {
     //Agregar productos
     async agregarProducto({ nombre_producto, descripcion, precio, cantidad, imagen_url, id_categoria, vendedor }) {
         const query = `
-            INSERT INTO productos (nombre_producto, descripcion, precio, cantidad, imagen_url, id_categoria, vendedor)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `;
-        await pool.query(query, [nombre_producto, descripcion, precio, cantidad, imagen_url, id_categoria, vendedor]);
+        INSERT INTO productos (nombre_producto, descripcion, precio, cantidad, imagen_url, id_categoria, vendedor)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+        const [result] = await pool.query(query, [nombre_producto, descripcion, precio, cantidad, imagen_url, id_categoria, vendedor]);
+        return result;
+    },
+    // Obtener imágenes por producto
+    async obtenerImagenesPorProducto(id_producto) {
+        const query = 'SELECT * FROM imagenes_producto WHERE id_producto = ? ORDER BY orden ASC';
+        const [rows] = await pool.query(query, [id_producto]);
+        return rows || []; // ← devuelve array vacío si no hay imágenes
+    },
+    async agregarImagenProducto({ id_producto, url_imagen, orden }) {
+        const query = `
+        INSERT INTO imagenes_producto (id_producto, url_imagen, orden)
+        VALUES (?, ?, ?)
+    `;
+        await pool.query(query, [id_producto, url_imagen, orden]);
     },
 
     // Obtener productos por id
@@ -114,6 +128,33 @@ const UserModel = {
             params = [nombre_producto, descripcion, precio, cantidad, id_categoria, vendedor, id_producto];
         }
         await pool.query(query, params);
+    },
+    async actualizarImagenProducto(id_producto, url_imagen) {
+        const query = `
+            UPDATE imagenes_producto
+            SET url_imagen = ?
+            WHERE id_producto = ? AND orden = 1
+        `;
+        const [result] = await pool.query(query, [url_imagen, id_producto]);
+        // Si no existía imagen, la insertamos
+        if (result.affectedRows == 0) {
+            const insertQuery = `
+            INSERT INTO imagenes_producto (id_producto, url_imagen, orden)
+            VALUES (?, ?, 1)
+            `;
+            await pool.query(insertQuery, [id_producto, url_imagen]);
+        }
+    },
+    async eliminarImagenesProducto(id_producto) {
+        const query = 'DELETE FROM imagenes_producto WHERE id_producto = ?';
+        await pool.query(query, [id_producto]);
+    },
+    async actualizarImagenPrincipalProducto(id_producto, imagen_url) {
+        const query = `
+        UPDATE productos SET imagen_url = ?
+        WHERE id_producto = ?
+    `;
+        await pool.query(query, [imagen_url, id_producto]);
     },
 
     // ELiminar productos
@@ -187,10 +228,14 @@ const UserModel = {
     // Buscar Productos
     async buscarProductos(searchTerm) {
         try {
+            const term = searchTerm.toLowerCase();
             const [rows] = await pool.query(
-                'SELECT * FROM productos WHERE nombre_producto LIKE ? OR descripcion LIKE ?',
-                [`%${searchTerm}%`, `%${searchTerm}%`]
+                `SELECT * FROM productos 
+                WHERE LOWER(nombre_producto) LIKE ? 
+                    OR LOWER(descripcion) LIKE ?`,
+                [`%${term}%`, `%${term}%`]
             );
+
             return rows;
         } catch (error) {
             throw err;

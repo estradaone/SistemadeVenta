@@ -44,4 +44,15 @@ router.get('/reordenarMovil/:id_pedido', UserControllerMovil.reordenarPedidosMov
 router.get('/verReembolsoMovil/:id', UserControllerMovil.verReembolsoMovil);
 // Enviar mensaje desde contactos
 router.post('/enviarMensajeMovil', UserControllerMovil.enviarMensajeMovil);
+
+// Ver y editar pefil
+router.post('/verPerfilMovil', UserControllerMovil.verPerfilUsuarioMovil);
+router.post('/actualizarPerfilMovil', UserControllerMovil.actualizarPerfilMovil);
+
+// Restablecer contraseña
+router.post('/sendResetTokenMovil', UserControllerMovil.sendResetTokenMovil);
+router.post('/resetPasswordMovil', UserControllerMovil.resetPasswordMovil);
+
+// Buscar productos
+router.get('/buscarProductosMovil', UserControllerMovil.buscarProductosMovil);
 module.exports = router;

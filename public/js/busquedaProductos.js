@@ -38,13 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         <p class="card-text">${producto.descripcion}</p>
                                         <p class="card-text fw-bold text-success">$${producto.precio}</p>
                                         <a href="/usuarios/producto/${producto.id_producto}" class="btn btn-outline-primary btn-sm">Ver producto</a>
-                                        <button class="btn btn-primary btn-sm agregar-carrito"
-                                            data-id="${producto.id_producto}"
-                                            data-nombre="${producto.nombre_producto}"
-                                            data-precio="${producto.precio}"
-                                            data-imagen="${producto.imagen_url}">
-                                            Añadir al carrito
-                                        </button>
+                                        
                                     </div>
                                 </div>
                             </div>
