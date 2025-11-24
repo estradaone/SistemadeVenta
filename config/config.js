@@ -8,7 +8,7 @@ const config = {
         database: process.env.DB_NAME || 'artesania',
         port: Number(process.env.DB_PORT || 3306),
     },
-    baseUrl: process.env.BASE_URL || 'https://tudominio.com',
+    baseUrl: process.env.BASE_URL || 'https://artesaniamundial.onrender.com',
     emailUser: process.env.EMAIL_USER,
     emailPass: process.env.EMAIL_PASS,
 };
