@@ -216,7 +216,7 @@ router.post('/editar-direccion/:id', UserController.actualizarDireccion);
 router.get('/ver-compra/:id', UserController.verCompra);
 
 //Ruta de enviar formulario de ayuda
-router.get('/test-mail', UserController.testCorreo);
+router.post('/enviar-mensaje', UserController.enviarMensaje);
 
 //Ruta de reordenar
 router.get('/reordenar/:id_pedido', UserController.reordenarPedido);
