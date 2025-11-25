@@ -382,7 +382,7 @@ const UserController = {
             await UserModel.eliminarImagenesProducto(id_producto);
 
             await UserModel.eliminarProducto(id_producto);
-            
+
             res.redirect('/usuarios/admin/categorias/accesorios');
         } catch (error) {
             console.error('Error al eliminar el producto', error);
@@ -706,34 +706,29 @@ const UserController = {
         }
     },
 
-    async enviarMensaje(req, res) {
-        const { nombre, email, asunto, mensaje } = req.body;
+    async testCorreo(req, res) {
         try {
             const transporter = nodemailer.createTransport({
-                service: 'gmail',
+                host: "smtp.gmail.com",
+                port: 465,
+                secure: true,
                 auth: {
                     user: process.env.EMAIL_USER,
                     pass: process.env.EMAIL_PASS
                 }
             });
-            const mailOptions = {
-                from: `"${nombre}" <${email}>`,
+
+            await transporter.sendMail({
+                from: process.env.EMAIL_USER,
                 to: process.env.EMAIL_USER,
-                subject: `Contacto: ${asunto}`,
-                text: mensaje,
-                html: `
-                    <h3>Nuevo mensaje de contacto</h3>
-                    <p><strong>Nombre:</strong> ${nombre}</p>
-                    <p><strong>Email:</strong> ${email}</p>
-                    <p><strong>Asunto:</strong> ${asunto}</p>
-                    <p><strong>Mensaje:</strong><br>${mensaje}</p>
-                `
-            };
-            await transporter.sendMail(mailOptions);
-            res.redirect('/ayuda?enviado=true');
-        } catch (error) {
-            console.error('Error al enviar el correo:', error);
-            res.redirect('/ayuda?error=true');
+                subject: 'Prueba desde Render',
+                text: 'Este es un correo de prueba para verificar que Nodemailer funciona en producción.'
+            });
+
+            res.send('✅ Correo enviado correctamente desde Render');
+        } catch (err) {
+            console.error('❌ Error al enviar correo de prueba:', err.message);
+            res.send(`❌ Error: ${err.message}`);
         }
     },
 
