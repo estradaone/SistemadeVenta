@@ -708,35 +708,33 @@ const UserController = {
 
     async enviarMensaje(req, res) {
         const { nombre, email, asunto, mensaje } = req.body;
-
         try {
             const transporter = nodemailer.createTransport({
-                host: 'smtp.sendgrid.net',
-                port: 587,
+                service: "smtp.gmail.com",
+                port: 465,
+                secure: true,
                 auth: {
-                    user: 'apikey', // SendGrid exige este valor fijo
-                    pass: process.env.SENDGRID_API_KEY
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.EMAIL_PASS
                 }
             });
-
             const mailOptions = {
-                from: process.env.EMAIL_FROM,
-                to: process.env.EMAIL_TO,
+                from: `"${nombre}" <${email}>`,
+                to: process.env.EMAIL_USER,
                 subject: `Contacto: ${asunto}`,
                 text: mensaje,
                 html: `
-                <h3>Nuevo mensaje de contacto</h3>
-                <p><strong>Nombre:</strong> ${nombre}</p>
-                <p><strong>Email:</strong> ${email}</p>
-                <p><strong>Asunto:</strong> ${asunto}</p>
-                <p><strong>Mensaje:</strong><br>${mensaje}</p>
-        `
+                    <h3>Nuevo mensaje de contacto</h3>
+                    <p><strong>Nombre:</strong> ${nombre}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Asunto:</strong> ${asunto}</p>
+                    <p><strong>Mensaje:</strong><br>${mensaje}</p>
+                `
             };
-
             await transporter.sendMail(mailOptions);
             res.redirect('/ayuda?enviado=true');
         } catch (error) {
-            console.error('❌ Error al enviar el correo:', error.message);
+            console.error('Error al enviar el correo:', error);
             res.redirect('/ayuda?error=true');
         }
     },
