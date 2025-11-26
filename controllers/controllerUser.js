@@ -85,6 +85,7 @@ const UserController = {
         })
     },
     async enviarMensaje(req, res) {
+        console.log('Formulario recibido:', req.body);
         const { nombre, email, asunto, mensaje } = req.body;
 
         try {
