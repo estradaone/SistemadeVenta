@@ -6,6 +6,7 @@ const { route } = require('./api');
 const controllerUser = require('../controllers/controllerUser');
 const { upload } = require('../controllers/controllerUser');
 const controladorPaypal = require('../controllers/controladorPaypal');
+const controladorMensaje = require('../controllers/controllerEnviarMensaje');
 const nodemailer = require('nodemailer')
 
 // Ruta para registrar un usuario
@@ -216,8 +217,9 @@ router.post('/editar-direccion/:id', UserController.actualizarDireccion);
 // Ruta del detalle de la compra
 router.get('/ver-compra/:id', UserController.verCompra);
 
-//Ruta de enviar formulario de ayuda
-router.post('/enviar-mensaje', UserController.enviarMensaje);
+
+// Ruta de enviar formulario de ayuda por WhatsApp
+router.post('/enviar-mensaje-whatsapp', controladorMensaje.enviarMensajeWhatsApp);
 
 //Ruta de reordenar
 router.get('/reordenar/:id_pedido', UserController.reordenarPedido);

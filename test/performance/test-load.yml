@@ -1,6 +1,6 @@
 # tests/performance/test-load.yml
 config:
-  target: 'https://localhost:3001'
+  target: 'https://sistemadeventa.onrender.com'
   tls:
     rejectUnauthorized: false
   phases:

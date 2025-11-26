@@ -10,7 +10,6 @@ const pool = require('../database/db');
 const { console } = require('inspector');
 const pdf = require('html-pdf');
 const ejs = require('ejs');
-const twilio = require('twilio')
 
 //Configuracion para subir imagenes
 const storage = multer.diskStorage({
@@ -83,30 +82,6 @@ const UserController = {
             }
             res.redirect('/');
         })
-    },
-    async enviarMensaje(req, res) {
-        console.log('Formulario recibido:', req.body);
-        const { nombre, email, asunto, mensaje } = req.body;
-
-        try {
-            const client = twilio(
-                process.env.TWILIO_ACCOUNT_SID,
-                process.env.TWILIO_AUTH_TOKEN
-            );
-
-            const body = `📩 Nuevo mensaje de contacto:\n\n👤 Nombre: ${nombre}\n📧 Email: ${email}\n📝 Asunto: ${asunto}\n💬 Mensaje:\n${mensaje}`;
-
-            await client.messages.create({
-                from: process.env.TWILIO_WHATSAPP_FROM,
-                to: process.env.TWILIO_WHATSAPP_TO,
-                body
-            });
-
-            res.redirect('/ayuda?enviado=true');
-        } catch (error) {
-            console.error('❌ Error al enviar WhatsApp:', error.message);
-            res.redirect('/ayuda?error=true');
-        }
     },
 
     async getAccesorios(req, res) {
