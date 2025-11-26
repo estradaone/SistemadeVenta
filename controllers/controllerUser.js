@@ -10,6 +10,7 @@ const pool = require('../database/db');
 const { console } = require('inspector');
 const pdf = require('html-pdf');
 const ejs = require('ejs');
+const twilio = require('twilio');
 
 //Configuracion para subir imagenes
 const storage = multer.diskStorage({
@@ -186,37 +187,26 @@ const UserController = {
             // Guardar el token en la base de datos
             await UserModel.setResetToken(email, token, expiration);
 
-            // Configurar transporte con SendGrid
-            const transporter = nodemailer.createTransport({
-                host: 'smtp.sendgrid.net',
-                port: 587,
-                auth: {
-                    user: 'apikey', // literal
-                    pass: process.env.SEND_API_KEY
-                }
-            });
-
             // Crear enlace de recuperación
             const resetLink = `${process.env.BASE_URL}/usuarios/reset-password/${token}`;
 
-            const mailOptions = {
-                from: process.env.EMAIL_FROM, // remitente verificado en SendGrid
-                to: email,                    // destinatario: el usuario que pidió reset
-                subject: 'Restablece tu contraseña',
-                html: `
-                <h3>Recuperación de contraseña</h3>
-                <p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
-                <a href="${resetLink}">${resetLink}</a>
-                <p>Este enlace expirará en 1 hora.</p>
-            `
-            };
+            // Configurar cliente Twilio
+            const client = twilio(
+                process.env.TWILIO_ACCOUNT_SID,
+                process.env.TWILIO_AUTH_TOKEN
+            );
 
-            // Enviar el correo
-            await transporter.sendMail(mailOptions);
-            res.render('forgot-password', { message: 'Correo enviado con éxito' });
+            // Enviar mensaje por WhatsApp
+            await client.messages.create({
+                from: `whatsapp:${process.env.TWILIO_WHATSAPP_FROM}`,
+                to: `whatsapp:${process.env.TWILIO_WHATSAPP_TO}`,
+                body: `🔑 Recuperación de contraseña:\n\nHaz clic en el siguiente enlace para restablecer tu contraseña:\n${resetLink}\n\nEste enlace expirará en 1 hora.`
+            });
+
+            res.render('forgot-password', { message: 'Enlace de recuperación enviado por WhatsApp' });
         } catch (error) {
-            console.error('❌ Error al enviar el correo:', error);
-            res.render('forgot-password', { message: 'Error al enviar el correo' });
+            console.error('❌ Error al enviar WhatsApp:', error);
+            res.render('forgot-password', { message: 'Error al enviar el enlace por WhatsApp' });
         }
     },
 

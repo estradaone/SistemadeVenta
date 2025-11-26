@@ -4,6 +4,7 @@ const crypto = require('crypto')
 const nodemailer = require('nodemailer')
 const { verDetalleProducto, resetPassword } = require('./controllerUser');
 const pool = require('../database/db');
+const twilio = require('twilio');
 
 const UserControllerMovil = {
     // Registro de cuenta
@@ -467,33 +468,23 @@ const UserControllerMovil = {
         const { nombre, email, asunto, mensaje } = req.body;
 
         try {
-            const transporter = nodemailer.createTransport({
-                service: 'gmail',
-                auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASS
-                }
+            const client = twilio(
+                process.env.TWILIO_ACCOUNT_SID,
+                process.env.TWILIO_AUTH_TOKEN
+            );
+
+            const body = `📲 Nuevo mensaje desde la app móvil:\n\n👤 Nombre: ${nombre}\n📧 Email: ${email}\n📝 Asunto: ${asunto}\n💬 Mensaje:\n${mensaje}`;
+
+            await client.messages.create({
+                from: `whatsapp:${process.env.TWILIO_WHATSAPP_FROM}`, // número sandbox Twilio
+                to: `whatsapp:${process.env.TWILIO_WHATSAPP_TO}`,     // tu número
+                body
             });
 
-            const mailOptions = {
-                from: `"${nombre}" <${email}>`,
-                to: process.env.EMAIL_USER,
-                subject: `Contacto: ${asunto}`,
-                text: mensaje,
-                html: `
-                <h3>Nuevo mensaje de contacto</h3>
-                <p><strong>Nombre:</strong> ${nombre}</p>
-                <p><strong>Email:</strong> ${email}</p>
-                <p><strong>Asunto:</strong> ${asunto}</p>
-                <p><strong>Mensaje:</strong><br>${mensaje}</p>
-            `
-            };
-
-            await transporter.sendMail(mailOptions);
-            res.status(200).json({ success: true, mensaje: 'Mensaje enviado correctamente' });
+            res.status(200).json({ success: true, mensaje: 'Mensaje enviado correctamente por WhatsApp' });
         } catch (error) {
-            console.error('Error al enviar el correo:', error);
-            res.status(500).json({ success: false, error: 'Error al enviar el mensaje' });
+            console.error('❌ Error al enviar WhatsApp:', error);
+            res.status(500).json({ success: false, error: 'Error al enviar el mensaje por WhatsApp' });
         }
     },
 

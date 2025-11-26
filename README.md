@@ -15,6 +15,11 @@ Aplicación Node.js con Express, EJS y MySQL desplegada en Render.
 - `EMAIL_FROM`
 - `EMAIL_TO`
 - `SEND_API_KEY`
+- `TWILIO_ACCOUNT_SID`
+- `TWILIO_AUTH_TOKEN`
+- `TWILIO_WHATSAPP_FROM`
+- `TWILIO_WHATSAPP_TO`
+
 
 ## Comando de inicio
 
