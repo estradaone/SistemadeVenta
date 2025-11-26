@@ -170,12 +170,11 @@ const UserController = {
         }
     },
 
-    // Restablecer contraseña
     async sendResetToken(req, res) {
         const { email } = req.body;
 
         try {
-            // Verificar si el usuario existe (sin contraseña)
+            // Verificar si el usuario existe
             const user = await UserModel.authenticateUser(email);
             if (!user) {
                 return res.render('forgot-password', { message: 'Usuario no encontrado' });
@@ -188,30 +187,36 @@ const UserController = {
             // Guardar el token en la base de datos
             await UserModel.setResetToken(email, token, expiration);
 
-            // Configurar transporte para enviar el correo
-            require('dotenv').config();
+            // Configurar transporte con SendGrid
             const transporter = nodemailer.createTransport({
-                service: 'gmail',
+                host: 'smtp.sendgrid.net',
+                port: 587,
                 auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASS
+                    user: 'apikey', // literal
+                    pass: process.env.SEND_API_KEY
                 }
             });
 
             // Crear enlace de recuperación
             const resetLink = `${process.env.BASE_URL}/usuarios/reset-password/${token}`;
+
             const mailOptions = {
-                from: process.env.EMAIL_USER,
-                to: email,
+                from: process.env.EMAIL_FROM, // remitente verificado en SendGrid
+                to: email,                    // destinatario: el usuario que pidió reset
                 subject: 'Restablece tu contraseña',
-                html: `<p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p><a href="${resetLink}">${resetLink}</a>`
+                html: `
+                <h3>Recuperación de contraseña</h3>
+                <p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p>
+                <a href="${resetLink}">${resetLink}</a>
+                <p>Este enlace expirará en 1 hora.</p>
+            `
             };
 
             // Enviar el correo
             await transporter.sendMail(mailOptions);
             res.render('forgot-password', { message: 'Correo enviado con éxito' });
         } catch (error) {
-            console.error('Error al enviar el correo:', error);
+            console.error('❌ Error al enviar el correo:', error);
             res.render('forgot-password', { message: 'Error al enviar el correo' });
         }
     },
