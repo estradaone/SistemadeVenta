@@ -6,6 +6,7 @@ const { route } = require('./api');
 const controllerUser = require('../controllers/controllerUser');
 const { upload } = require('../controllers/controllerUser');
 const controladorPaypal = require('../controllers/controladorPaypal');
+const nodemailer = require('nodemailer')
 
 // Ruta para registrar un usuario
 router.post('/registrar', UserController.registrarUsuario);
