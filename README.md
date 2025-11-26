@@ -10,6 +10,7 @@ Aplicación Node.js con Express, EJS y MySQL desplegada en Render.
 - `DB_NAME`
 - `DB_PORT`
 - `BASE_URL`
+- `EMAIL_USER`
 - `EMAIL_PASS`
 - `EMAIL_FROM`
 - `EMAIL_TO`
