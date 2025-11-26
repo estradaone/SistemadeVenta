@@ -520,37 +520,40 @@ const UserControllerMovil = {
         const { email } = req.body;
 
         try {
+            // Verificar si el usuario existe
             const user = await UserModel.authenticateUser(email);
             if (!user) {
                 return res.status(404).json({ success: false, message: 'Usuario no encontrado' });
             }
 
+            // Generar token único y establecer tiempo de expiración
             const token = crypto.randomBytes(32).toString('hex');
             const expiration = new Date(Date.now() + 3600000); // 1 hora
 
+            // Guardar el token en la base de datos
             await UserModel.setResetToken(email, token, expiration);
 
-            const transporter = nodemailer.createTransport({
-                service: 'gmail',
-                auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASS
-                }
+            // Crear enlace de recuperación
+            const resetLink = `${process.env.BASE_URL}/usuarios/reset-password/${token}`;
+
+            // Configurar cliente Twilio
+            const client = twilio(
+                process.env.TWILIO_ACCOUNT_SID,
+                process.env.TWILIO_AUTH_TOKEN
+            );
+
+            // Enviar mensaje por WhatsApp
+            await client.messages.create({
+                from: `whatsapp:${process.env.TWILIO_WHATSAPP_FROM}`, // número sandbox Twilio
+                to: `whatsapp:${process.env.TWILIO_WHATSAPP_TO}`,     // tu número
+                body: `🔑 Recuperación de contraseña:\n\nHaz clic en el siguiente enlace para restablecer tu contraseña:\n${resetLink}\n\nEste enlace expirará en 1 hora.`
             });
 
-            const resetLink = `${process.env.BASE_URL}/usuarios/reset-password/${token}`;
-            const mailOptions = {
-                from: process.env.EMAIL_USER,
-                to: email,
-                subject: 'Restablece tu contraseña',
-                html: `<p>Haz clic en el siguiente enlace para restablecer tu contraseña:</p><a href="${resetLink}">${resetLink}</a>`
-            };
-
-            await transporter.sendMail(mailOptions);
-            res.status(200).json({ success: true, message: 'Correo enviado con éxito' });
+            // Respuesta en JSON para la app móvil
+            res.status(200).json({ success: true, message: 'Enlace de recuperación enviado por WhatsApp' });
         } catch (error) {
-            console.error('Error al enviar el correo:', error);
-            res.status(500).json({ success: false, message: 'Error al enviar el correo' });
+            console.error('❌ Error al enviar WhatsApp:', error);
+            res.status(500).json({ success: false, message: 'Error al enviar el enlace por WhatsApp' });
         }
     },
 
