@@ -468,19 +468,23 @@ const UserControllerMovil = {
         const { nombre, email, asunto, mensaje } = req.body;
 
         try {
+            // Inicializar cliente Twilio con variables de entorno
             const client = twilio(
                 process.env.TWILIO_ACCOUNT_SID,
                 process.env.TWILIO_AUTH_TOKEN
             );
 
+            // Construir el cuerpo del mensaje
             const body = `📲 Nuevo mensaje desde la app móvil:\n\n👤 Nombre: ${nombre}\n📧 Email: ${email}\n📝 Asunto: ${asunto}\n💬 Mensaje:\n${mensaje}`;
 
+            // Enviar mensaje por WhatsApp
             await client.messages.create({
                 from: `whatsapp:${process.env.TWILIO_WHATSAPP_FROM}`, // número sandbox Twilio
                 to: `whatsapp:${process.env.TWILIO_WHATSAPP_TO}`,     // tu número
                 body
             });
 
+            // Respuesta en JSON para la app móvil
             res.status(200).json({ success: true, mensaje: 'Mensaje enviado correctamente por WhatsApp' });
         } catch (error) {
             console.error('❌ Error al enviar WhatsApp:', error);
