@@ -218,6 +218,10 @@ router.get('/ver-compra/:id', UserController.verCompra);
 
 //Ruta de enviar formulario de ayuda
 router.post('/enviar-mensaje', UserController.enviarMensaje);
+router.get('/enviar-mensaje', (req, res) => {
+    res.send('Esta ruta solo acepta POST desde el formulario.');
+});
+
 
 router.get('/test-mail', async (req, res) => {
     try {
