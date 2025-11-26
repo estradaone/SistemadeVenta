@@ -218,34 +218,6 @@ router.get('/ver-compra/:id', UserController.verCompra);
 
 //Ruta de enviar formulario de ayuda
 router.post('/enviar-mensaje', UserController.enviarMensaje);
-router.get('/enviar-mensaje', (req, res) => {
-    res.send('Esta ruta solo acepta POST desde el formulario.');
-});
-
-
-router.get('/test-mail', async (req, res) => {
-    try {
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.sendgrid.net',
-            port: 587,
-            auth: {
-                user: 'apikey',
-                pass: process.env.SEND_API_KEY
-            }
-        });
-
-        await transporter.sendMail({
-            from: process.env.EMAIL_FROM,
-            to: process.env.EMAIL_TO,
-            subject: 'Prueba desde Render',
-            text: 'Este es un correo de prueba para verificar SendGrid desde tu app en producción.'
-        });
-
-        res.send('✅ Correo enviado correctamente');
-    } catch (error) {
-        res.send(`❌ Error al enviar: ${error.message}`);
-    }
-});
 
 //Ruta de reordenar
 router.get('/reordenar/:id_pedido', UserController.reordenarPedido);
