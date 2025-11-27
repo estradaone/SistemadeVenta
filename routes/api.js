@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const UserControllerMovil = require('../controllers/controllerMovil');
 
-router.post('/registrarUsuarioMovil', UserControllerMovil.registrarUsuarioMovil);
+router.post('/registrarUsuario', UserControllerMovil.registrarUsuarioMovil);
 router.post('/login', UserControllerMovil.login);
 router.get('/todosProductos', UserControllerMovil.obtenerTodosLosProductos);
 //Productos relacionado con las categorias
