@@ -116,7 +116,7 @@ const UserController = {
 
     async getSombreros(req, res) {
         try {
-            const productos = await UserModel.getProductsByCategory('Sombreros');
+            const productos = await UserModel.getProductsByCategory('Sombreros'.toLowerCase());
             if (req.session.user && req.session.user.rol === 'administrador') {
                 res.render('admin/categorias/sombreros', { productos });
             } else {
