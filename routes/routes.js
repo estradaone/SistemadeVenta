@@ -229,7 +229,7 @@ router.get('/admin/editarPedido/:id', UserController.formEditarPedido);
 router.post('/admin/editarPedido/:id', UserController.actualizarPedido);
 
 router.post('/cancelar-pedido/:id', UserController.cancelarPedido);
-router.get('/reembolso/:id', UserController.verReembolso);
+router.get('/rembolso/:id', UserController.verReembolso);
 
 
 //Ruta para generar PDF
