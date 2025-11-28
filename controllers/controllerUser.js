@@ -858,7 +858,7 @@ const UserController = {
                 return res.status(404).send('Este pedido no está cancelado o no existe.');
             }
 
-            res.render('usuarios/rembolso', { pedido, productos });
+            res.render('usuarios/reembolso', { pedido, productos });
         } catch (error) {
             console.error('Error al cargar reembolso:', error);
             res.status(500).send('Error interno del servidor.');
