@@ -25,34 +25,25 @@ const upload = multer({ storage });
 const UserController = {
     async registrarUsuario(req, res) {
         const { nombre, apellidos, email, password } = req.body;
-
         try {
-            // Encriptar la contraseña antes de guardarla
             const hashedPassword = await bcrypt.hash(password, 10);
+            const resultado = await UserModel.registrarUsuario({ nombre, apellidos, email, password: hashedPassword });
 
-            // Registrar al usuario en la base de datos
-            await UserModel.registrarUsuario({
-                nombre,
-                apellidos,
-                email,
-                password: hashedPassword
-            });
-
-            // Configurar la sesión del usuario
             req.session.user = {
+                id_usuario: resultado.insertId,
                 nombre,
                 apellidos,
                 email,
                 rol: 'usuario'
             };
 
-            // Redirigir al home
             res.redirect('/');
         } catch (error) {
             console.error('Error al registrar el usuario:', error);
             res.status(500).send('Error al registrar el usuario.');
         }
-    },
+    }
+    ,
 
     async authenticateUser(req, res) {
         const { email, password } = req.body;
