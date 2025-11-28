@@ -29,34 +29,56 @@
                             <!-- Columna derecha -->
                             <div class="col-md-6 p-4">
                                 <h3 class="text-center mb-4">Registro de Usuario</h3>
-                                <form action="/usuarios/registrar" method="POST">
-                                    <div class="mb-3">
-                                        <label for="nombre" class="form-label">Nombre</label>
-                                        <input type="text" id="nombre" name="nombre" class="form-control" required>
+
+                                <% if (typeof error !=='undefined' ) { %>
+                                    <div class="alert alert-danger">
+                                        <%= error %>
                                     </div>
-                                    <div class="mb-3">
-                                        <label for="apellidos" class="form-label">Apellidos</label>
-                                        <input type="text" id="apellidos" name="apellidos" class="form-control"
-                                            required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="email" class="form-label">Correo Electrónico</label>
-                                        <input type="email" id="email" name="email" class="form-control" required>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="password" class="form-label">Contraseña</label>
-                                        <input type="password" id="password" name="password" class="form-control"
-                                            required>
-                                    </div>
-                                    <div class="d-grid mb-3">
-                                        <button type="submit" class="btn btn-primary">Registrar</button>
-                                    </div>
-                                    <div class="text-center">
-                                        <a href="/usuarios/loggin" class="text-decoration-none">¿Ya tienes cuenta?
-                                            Inicia sesión</a>
-                                    </div>
-                                </form>
+                                    <% } %>
+
+                                        <% if (typeof success !=='undefined' ) { %>
+                                            <div class="alert alert-success">
+                                                <%= success %>
+                                            </div>
+                                            <script>
+                                                // Redirigir al login después de 2 segundos
+                                                setTimeout(() => {
+                                                    window.location.href = "/usuarios/loggin";
+                                                }, 2000);
+                                            </script>
+                                            <% } %>
+
+                                                <form action="/usuarios/registrar" method="POST">
+                                                    <div class="mb-3">
+                                                        <label for="nombre" class="form-label">Nombre</label>
+                                                        <input type="text" id="nombre" name="nombre"
+                                                            class="form-control" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="apellidos" class="form-label">Apellidos</label>
+                                                        <input type="text" id="apellidos" name="apellidos"
+                                                            class="form-control" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="email" class="form-label">Correo Electrónico</label>
+                                                        <input type="email" id="email" name="email" class="form-control"
+                                                            required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="password" class="form-label">Contraseña</label>
+                                                        <input type="password" id="password" name="password"
+                                                            class="form-control" required>
+                                                    </div>
+                                                    <div class="d-grid mb-3">
+                                                        <button type="submit" class="btn btn-primary">Registrar</button>
+                                                    </div>
+                                                    <div class="text-center">
+                                                        <a href="/usuarios/loggin" class="text-decoration-none">¿Ya
+                                                            tienes cuenta? Inicia sesión</a>
+                                                    </div>
+                                                </form>
                             </div>
+
                         </div>
                     </div>
                 </div>

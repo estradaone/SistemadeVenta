@@ -27,7 +27,28 @@ const UserController = {
         const { nombre, apellidos, email, password } = req.body;
 
         try {
-            // Encriptar la contraseña antes de guardarla
+            // Validaciones básicas
+            if (!nombre || !apellidos || !email || !password) {
+                return res.status(400).render('registro.ejs', { error: 'Todos los campos son obligatorios' });
+            }
+
+            if (password.length < 6) {
+                return res.status(400).render('registro.ejs', { error: 'La contraseña debe tener al menos 6 caracteres' });
+            }
+
+            // Validar formato de correo
+            const validarEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!validarEmail.test(email.trim())) {
+                return res.status(400).render('registro.ejs', { error: 'Correo electrónico inválido' });
+            }
+
+            // Verificar si el correo ya existe
+            const existente = await UserModel.buscarPorEmail(email);
+            if (existente) {
+                return res.status(409).render('registro.ejs', { error: 'El correo ya está registrado' });
+            }
+
+            // Encriptar la contraseña
             const hashedPassword = await bcrypt.hash(password, 10);
 
             // Registrar al usuario en la base de datos
@@ -38,21 +59,15 @@ const UserController = {
                 password: hashedPassword
             });
 
-            // Configurar la sesión del usuario
-            req.session.user = {
-                nombre,
-                apellidos,
-                email,
-                rol: 'usuario'
-            };
+            // En lugar de iniciar sesión automático, mostramos mensaje y redirigimos al login
+            return res.render('registro.ejs', { success: 'Cuenta creada correctamente. Ahora puedes iniciar sesión.' });
 
-            // Redirigir al home
-            res.redirect('/');
         } catch (error) {
             console.error('Error al registrar el usuario:', error);
-            res.status(500).send('Error al registrar el usuario.');
+            return res.status(500).render('registro.ejs', { error: 'Error interno al registrar el usuario.' });
         }
-    },
+    }
+    ,
 
     async authenticateUser(req, res) {
         const { email, password } = req.body;
