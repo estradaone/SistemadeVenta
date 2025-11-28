@@ -22,25 +22,33 @@ const UserControllerMovil = {
 
             const hashedPassword = await bcrypt.hash(password, 10);
 
-            const nuevoUsuario = await UserModel.registrarUsuario({
+            // Inserta el usuario y obtiene el ID
+            const resultado = await UserModel.registrarUsuario({
                 nombre,
                 apellidos,
                 email,
                 password: hashedPassword
             });
 
+            const nuevoUsuarioId = resultado.insertId;
+
+            // Consulta el usuario completo por ID
+            const usuarioCompleto = await UserModel.buscarPorId(nuevoUsuarioId);
+
+            // Opcional: guardar en sesión si usas sesiones en web
             req.session.user = {
-                id_usuario: nuevoUsuario.id_usuario,
-                nombre: nuevoUsuario.nombre,
-                apellidos: nuevoUsuario.apellidos,
-                email: nuevoUsuario.email,
-                rol: nuevoUsuario.rol,
-                estado: nuevoUsuario.estado
+                id_usuario: usuarioCompleto.id_usuario,
+                nombre: usuarioCompleto.nombre,
+                apellidos: usuarioCompleto.apellidos,
+                email: usuarioCompleto.email,
+                rol: usuarioCompleto.rol,
+                estado: usuarioCompleto.estado
             };
 
+            // Respuesta para el frontend móvil
             return res.status(200).json({
                 mensaje: 'Usuario registrado correctamente',
-                usuario: nuevoUsuario
+                usuario: usuarioCompleto
             });
         } catch (error) {
             console.error('Error al registrar usuario:', error);

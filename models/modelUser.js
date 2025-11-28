@@ -28,6 +28,13 @@ const UserModel = {
         const [rows] = await pool.query(query, [email]);
         return rows[0]; // Devuelve el primer usuario encontrado o undefined
     },
+    async buscarPorId(id) {
+        const [rows] = await db.query(
+            'SELECT id_usuario, nombre, apellidos, email, rol, estado FROM usuarios WHERE id_usuario = ?',
+            [id]
+        );
+        return rows[0];
+    },
 
 
     async authenticateUser(email, password = null) {

@@ -875,7 +875,13 @@ const UserController = {
             res.status(500).json({ error: 'Error interno del servidor' });
         }
     },
-
+    async buscarPorId(id) {
+        const [rows] = await db.query(
+            'SELECT id_usuario, nombre, apellidos, email, rol, estado FROM usuarios WHERE id_usuario = ?',
+            [id]
+        );
+        return rows[0];
+    }
 
 };
 
