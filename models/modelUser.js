@@ -17,14 +17,14 @@ function calcularFechaEntrega(fechaBase) {
 const UserModel = {
     async registrarUsuario({ nombre, apellidos, email, password }) {
         const query = `
-            INSERT INTO Usuarios (nombre, apellidos, email, password, estado, rol) 
+            INSERT INTO usuarios (nombre, apellidos, email, password, estado, rol) 
             VALUES (?, ?, ?, ?, 'activo', 'usuario')
         `;
         const [result] = await pool.query(query, [nombre, apellidos, email, password]);
         return result;
     },
     async buscarPorEmail(email) {
-        const query = 'SELECT * FROM Usuarios WHERE email = ?';
+        const query = 'SELECT * FROM usuarios WHERE email = ?';
         const [rows] = await pool.query(query, [email]);
         return rows[0]; // Devuelve el primer usuario encontrado o undefined
     },
