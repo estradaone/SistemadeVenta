@@ -40,7 +40,7 @@ const UserControllerMovil = {
 
             return res.status(200).json({
                 mensaje: 'Usuario registrado correctamente',
-                usuario: req.session.user
+                usuario: nuevoUsuario
             });
         } catch (error) {
             console.error('Error al registrar usuario:', error);
