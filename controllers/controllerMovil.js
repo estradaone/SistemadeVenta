@@ -11,14 +11,36 @@ const UserControllerMovil = {
     async registrarUsuarioMovil(req, res) {
         const { nombre, apellidos, email, password } = req.body;
         try {
-            const hashedPassword = await bcrypt.hash(password, 10);
-            const resultado = await UserModel.registrarUsuario({ nombre, apellidos, email, password: hashedPassword });
+            if (!nombre || !apellidos || !email || !password) {
+                return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+            }
 
-            const usuarioCompleto = await UserModel.buscarPorId(resultado.insertId);
+            const existente = await UserModel.buscarPorEmail(email);
+            if (existente) {
+                return res.status(409).json({ error: 'El correo ya está registrado' });
+            }
+
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            const nuevoUsuario = await UserModel.registrarUsuario({
+                nombre,
+                apellidos,
+                email,
+                password: hashedPassword
+            });
+
+            req.session.user = {
+                id_usuario: nuevoUsuario.id_usuario,
+                nombre: nuevoUsuario.nombre,
+                apellidos: nuevoUsuario.apellidos,
+                email: nuevoUsuario.email,
+                rol: nuevoUsuario.rol,
+                estado: nuevoUsuario.estado
+            };
 
             return res.status(200).json({
                 mensaje: 'Usuario registrado correctamente',
-                usuario: usuarioCompleto
+                usuario: req.session.user
             });
         } catch (error) {
             console.error('Error al registrar usuario:', error);
