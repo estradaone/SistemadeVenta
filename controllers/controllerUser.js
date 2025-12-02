@@ -185,46 +185,6 @@ const UserController = {
         }
     },
 
-    async sendResetToken(req, res) {
-        const { email } = req.body;
-
-        try {
-            // Verificar si el usuario existe
-            const user = await UserModel.authenticateUser(email);
-            if (!user) {
-                return res.render('forgot-password', { message: 'Usuario no encontrado' });
-            }
-
-            // Generar token único y establecer tiempo de expiración
-            const token = crypto.randomBytes(32).toString('hex');
-            const expiration = new Date(Date.now() + 3600000); // 1 hora
-
-            // Guardar el token en la base de datos
-            await UserModel.setResetToken(email, token, expiration);
-
-            // Crear enlace de recuperación
-            const resetLink = `${process.env.BASE_URL}/usuarios/reset-password/${token}`;
-
-            // Configurar cliente Twilio
-            const client = twilio(
-                process.env.TWILIO_ACCOUNT_SID,
-                process.env.TWILIO_AUTH_TOKEN
-            );
-
-            // Enviar mensaje por WhatsApp
-            await client.messages.create({
-                from: `whatsapp:${process.env.TWILIO_WHATSAPP_FROM}`,
-                to: `whatsapp:${process.env.TWILIO_WHATSAPP_TO}`,
-                body: `🔑 Recuperación de contraseña:\n\nHaz clic en el siguiente enlace para restablecer tu contraseña:\n${resetLink}\n\nEste enlace expirará en 1 hora.`
-            });
-
-            res.render('forgot-password', { message: 'Enlace de recuperación enviado por WhatsApp' });
-        } catch (error) {
-            console.error('❌ Error al enviar WhatsApp:', error);
-            res.render('forgot-password', { message: 'Error al enviar el enlace por WhatsApp' });
-        }
-    },
-
     async resetPassword(req, res) {
         const { token, newPassword } = req.body;
 
@@ -239,30 +199,16 @@ const UserController = {
             const hashedPassword = await bcrypt.hash(newPassword, 10);
             await UserModel.updatePassword(user.id_usuario, hashedPassword);
 
-            // Configurar la sesión del usuario
-            req.session.user = {
-                id: user.id_usuario,
-                nombre: user.nombre,
-                rol: user.rol,
-                email: user.email
-            };
-
-            // Redirigir según el rol del usuario
-            let redirectUrl = '/';
-            if (user.rol === 'administrador') {
-                redirectUrl = '/admin/bienvenida';
-            } else if (user.rol === 'vendedor') {
-                redirectUrl = '/vendedor/bienvenida';
-            }
-
-            res.redirect(redirectUrl);
+            // 👉 Ya no configuramos sesión ni redirigimos directo
+            return res.render('reset-password', {
+                token: null,
+                successMessage: 'Tu contraseña fue cambiada correctamente. Serás redirigido al inicio de sesión...'
+            });
         } catch (error) {
-            console.error('Error al actualizar la contraseña e iniciar sesión:', error);
+            console.error('Error al actualizar la contraseña:', error);
             res.status(500).send('Error al actualizar la contraseña');
         }
     },
-
-
     // Mostrar el formulario
     async mostrarFormularioAgregar(req, res) {
         try {
