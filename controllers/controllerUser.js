@@ -185,6 +185,46 @@ const UserController = {
         }
     },
 
+    async sendResetToken(req, res) {
+        const { email } = req.body;
+
+        try {
+            // Verificar si el usuario existe
+            const user = await UserModel.authenticateUser(email);
+            if (!user) {
+                return res.render('forgot-password', { message: 'Usuario no encontrado' });
+            }
+
+            // Generar token único y establecer tiempo de expiración
+            const token = crypto.randomBytes(32).toString('hex');
+            const expiration = new Date(Date.now() + 3600000); // 1 hora
+
+            // Guardar el token en la base de datos
+            await UserModel.setResetToken(email, token, expiration);
+
+            // Crear enlace de recuperación
+            const resetLink = `${process.env.BASE_URL}/usuarios/reset-password/${token}`;
+
+            // Configurar cliente Twilio
+            const client = twilio(
+                process.env.TWILIO_ACCOUNT_SID,
+                process.env.TWILIO_AUTH_TOKEN
+            );
+
+            // Enviar mensaje por WhatsApp
+            await client.messages.create({
+                from: `whatsapp:${process.env.TWILIO_WHATSAPP_FROM}`,
+                to: `whatsapp:${process.env.TWILIO_WHATSAPP_TO}`,
+                body: `🔑 Recuperación de contraseña:\n\nHaz clic en el siguiente enlace para restablecer tu contraseña:\n${resetLink}\n\nEste enlace expirará en 1 hora.`
+            });
+
+            res.render('forgot-password', { message: 'Enlace de recuperación enviado por WhatsApp' });
+        } catch (error) {
+            console.error('❌ Error al enviar WhatsApp:', error);
+            res.render('forgot-password', { message: 'Error al enviar el enlace por WhatsApp' });
+        }
+    },
+
     async resetPassword(req, res) {
         const { token, newPassword } = req.body;
 
